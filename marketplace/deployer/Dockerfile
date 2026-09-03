@@ -26,10 +26,13 @@ FROM gcr.io/cloud-marketplace-tools/k8s/deployer_helm/onbuild@sha256:6a6d705987b
 COPY --from=kubectl-builder /out/kubectl /opt/kubectl/v1.36/kubectl
 COPY --from=helm-builder /out/helm /usr/local/bin/helm
 
-# The deployer does not use pip, setuptools, or wheel at runtime. Remove the
-# vulnerable build-oriented Python packages inherited from the pinned Google
-# base while retaining Python and PyYAML for schema validation.
-RUN apt-get purge -y python3-pip python3-setuptools python3-wheel \
+# Apply the current Ubuntu 22.04 security updates available for the pinned
+# Google deployer runtime. The deployer does not use pip, setuptools, or wheel
+# at runtime, so remove those build-oriented packages while retaining Python
+# and PyYAML for schema validation.
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y --no-install-recommends \
+    && apt-get purge -y python3-pip python3-setuptools python3-wheel \
     && rm -rf /var/lib/apt/lists/*
 
 # Google Marketplace Verification overlays /data-test on /data. The test
