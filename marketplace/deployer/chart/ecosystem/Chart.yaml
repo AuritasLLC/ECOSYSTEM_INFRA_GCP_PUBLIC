@@ -3,7 +3,7 @@ name: ecosystem
 description: ASM+ deployment on Google Kubernetes Engine
 type: application
 version: "0.1.0"
-appVersion: "1.0.0"
+appVersion: "1.0.1"
 icon: https://raw.githubusercontent.com/AuritasLLC/ECOSYSTEM_INFRA_GCP_PUBLIC/main/assets/asm-plus-logo.png
 
 dependencies:

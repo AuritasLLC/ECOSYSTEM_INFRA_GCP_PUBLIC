@@ -59,5 +59,5 @@ ENTRYPOINT ["/bin/bash", "/bin/deploy.sh"]
 
 LABEL org.opencontainers.image.title="Auritas Storage Manager (ASM+) Marketplace deployer" \
       org.opencontainers.image.vendor="Auritas LLC" \
-      org.opencontainers.image.version="1.0.0" \
+      org.opencontainers.image.version="1.0.1" \
       com.googleapis.cloudmarketplace.product.service.name="services/asm-plus.endpoints.auritas-asmplus-public.cloud.goog"

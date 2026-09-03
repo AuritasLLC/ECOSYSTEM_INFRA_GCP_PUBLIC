@@ -3,4 +3,4 @@ name: asm-plus-api
 description: ASM+ metadata, folders, workflow, audit, and document management API
 type: application
 version: 0.1.0
-appVersion: "1.0.0"
+appVersion: "1.0.1"
