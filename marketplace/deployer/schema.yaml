@@ -1,0 +1,292 @@
+x-google-marketplace:
+  schemaVersion: v2
+  applicationApiVersion: v1beta1
+  partnerId: auritas
+  solutionId: asm-plus
+  publishedVersion: "1.0.0"
+  publishedVersionMetadata:
+    releaseNote: Initial ASM+ BYOL release for Google Kubernetes Engine.
+    releaseTypes:
+      - Feature
+    recommended: true
+
+  images:
+    api-asm:
+      properties:
+        asm-api.image.repository:
+          type: REPO_WITH_REGISTRY
+        asm-api.image.tag:
+          type: TAG
+    api-auth:
+      properties:
+        auth-api.image.repository:
+          type: REPO_WITH_REGISTRY
+        auth-api.image.tag:
+          type: TAG
+    api-asm-plus:
+      properties:
+        asm-plus-api.image.repository:
+          type: REPO_WITH_REGISTRY
+        asm-plus-api.image.tag:
+          type: TAG
+    front-auth:
+      properties:
+        front-auth.image.repository:
+          type: REPO_WITH_REGISTRY
+        front-auth.image.tag:
+          type: TAG
+    front-asm-plus:
+      properties:
+        front-asm-plus.image.repository:
+          type: REPO_WITH_REGISTRY
+        front-asm-plus.image.tag:
+          type: TAG
+    front-viewer:
+      properties:
+        front-viewer.image.repository:
+          type: REPO_WITH_REGISTRY
+        front-viewer.image.tag:
+          type: TAG
+    api-sap:
+      properties:
+        api-sap.image.repository:
+          type: REPO_WITH_REGISTRY
+        api-sap.image.tag:
+          type: TAG
+    api-sf:
+      properties:
+        api-sf.image.repository:
+          type: REPO_WITH_REGISTRY
+        api-sf.image.tag:
+          type: TAG
+    cloud-sql-proxy:
+      properties:
+        global.cloudSql.proxy.repository:
+          type: REPO_WITH_REGISTRY
+        global.cloudSql.proxy.tag:
+          type: TAG
+    postgres:
+      properties:
+        postgresql.image.repository:
+          type: REPO_WITH_REGISTRY
+        postgresql.image.tag:
+          type: TAG
+
+properties:
+  name:
+    type: string
+    default: asm-plus
+    maxLength: 39
+    pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+    x-google-marketplace:
+      type: NAME
+  namespace:
+    type: string
+    default: asm-plus
+    x-google-marketplace:
+      type: NAMESPACE
+  marketplace-integration.image:
+    type: string
+    x-google-marketplace:
+      type: DEPLOYER_IMAGE
+
+  global.projectId:
+    type: string
+    title: Google Cloud project ID
+    description: Project that contains the target GKE cluster and ASM+ customer resources.
+  global.region:
+    type: string
+    title: Google Cloud region
+    description: Region of the customer-managed Cloud SQL instance and Cloud Storage bucket.
+    default: us-east1
+  global.bucketName:
+    type: string
+    title: Existing Cloud Storage bucket
+    description: Existing customer-owned bucket used by ASM Storage API for documents.
+  global.existingSecret:
+    type: string
+    title: Existing ASM+ Kubernetes Secret
+    description: Existing Secret containing the ASM+ database, authentication, and integration keys documented in the user guide.
+    default: asmplus-runtime-secrets
+  global.database.user:
+    type: string
+    title: PostgreSQL user
+    description: Existing PostgreSQL login used by ASM+ through the Cloud SQL Auth Proxy.
+    default: auritas
+  global.database.name:
+    type: string
+    title: PostgreSQL database
+    description: Existing PostgreSQL database used for ASM+ application metadata.
+    default: auritasdemo
+  global.publicUrls.auth:
+    type: string
+    title: Authentication portal URL
+    description: Customer-approved HTTPS base URL for the ASM+ authentication portal.
+    pattern: ^https://.+
+  global.publicUrls.apiAuth:
+    type: string
+    title: Authentication API URL
+    description: Customer-approved HTTPS base URL for the ASM+ Authentication API.
+    pattern: ^https://.+
+  global.publicUrls.app:
+    type: string
+    title: ASM+ application URL
+    description: Customer-approved HTTPS base URL for the ASM+ web application.
+    pattern: ^https://.+
+  global.publicUrls.apiAsmPlus:
+    type: string
+    title: ASM+ API URL
+    description: Customer-approved HTTPS base URL for the ASM+ document-management API.
+    pattern: ^https://.+
+  global.publicUrls.viewer:
+    type: string
+    title: Document viewer URL
+    description: Customer-approved HTTPS base URL for the ASM+ document viewer.
+    pattern: ^https://.+
+  global.publicUrls.apiSap:
+    type: string
+    title: SAP Business connector URL
+    description: Optional customer-approved HTTPS base URL for the SAP Business connector.
+    default: ""
+    pattern: ^(|https://.+)$
+  global.publicUrls.apiSf:
+    type: string
+    title: SAP SuccessFactors connector URL
+    description: Optional customer-approved HTTPS base URL for the SAP SuccessFactors connector.
+    default: ""
+    pattern: ^(|https://.+)$
+  global.cloudSql.instanceConnectionName:
+    type: string
+    title: Cloud SQL instance connection name
+    description: Existing PostgreSQL instance connection name in PROJECT:REGION:INSTANCE format.
+  global.cloudSql.serviceAccount.name:
+    type: string
+    title: ASM+ Kubernetes service account
+    x-google-marketplace:
+      type: SERVICE_ACCOUNT
+      serviceAccount:
+        description: Select the existing Kubernetes service account configured with Workload Identity for Cloud SQL and Cloud Storage.
+  global.cloudSql.privateIp:
+    type: boolean
+    title: Use the Cloud SQL private IP path
+    default: true
+  global.marketplace.consumptionLabel:
+    type: string
+    default: isol_plb32_0014m00001irgbqqaq_g4sz646dffwwygzqyiappxoc7q5x4tjk
+  global.marketplace.serviceName:
+    type: string
+    default: services/asm-plus.endpoints.auritas-asmplus-public.cloud.goog
+  global.marketplace.serviceLevel:
+    type: string
+    default: default
+
+  asm-api.enabled:
+    type: boolean
+    default: true
+  auth-api.enabled:
+    type: boolean
+    default: true
+  asm-plus-api.enabled:
+    type: boolean
+    default: true
+  front-auth.enabled:
+    type: boolean
+    default: true
+  front-asm-plus.enabled:
+    type: boolean
+    default: true
+  front-viewer.enabled:
+    type: boolean
+    default: true
+  migrations.auth.enabled:
+    type: boolean
+    default: true
+  migrations.asmPlus.enabled:
+    type: boolean
+    default: true
+  global.cloudSql.enabled:
+    type: boolean
+    title: Connect through Cloud SQL Auth Proxy
+    description: Required for the supported ASM+ production deployment profile.
+    default: true
+  api-sap.enabled:
+    type: boolean
+    title: Enable SAP Business connector
+    description: Deploy the optional SAP Business API connector.
+    default: false
+  api-sf.enabled:
+    type: boolean
+    title: Enable SAP SuccessFactors connector
+    description: Deploy the optional SAP SuccessFactors API connector.
+    default: false
+
+  asm-api.image.repository:
+    type: string
+  asm-api.image.tag:
+    type: string
+  auth-api.image.repository:
+    type: string
+  auth-api.image.tag:
+    type: string
+  asm-plus-api.image.repository:
+    type: string
+  asm-plus-api.image.tag:
+    type: string
+  front-auth.image.repository:
+    type: string
+  front-auth.image.tag:
+    type: string
+  front-asm-plus.image.repository:
+    type: string
+  front-asm-plus.image.tag:
+    type: string
+  front-viewer.image.repository:
+    type: string
+  front-viewer.image.tag:
+    type: string
+  api-sap.image.repository:
+    type: string
+  api-sap.image.tag:
+    type: string
+  api-sf.image.repository:
+    type: string
+  api-sf.image.tag:
+    type: string
+  global.cloudSql.proxy.repository:
+    type: string
+  global.cloudSql.proxy.tag:
+    type: string
+  postgresql.image.repository:
+    type: string
+  postgresql.image.tag:
+    type: string
+
+required:
+  - name
+  - namespace
+  - marketplace-integration.image
+  - global.projectId
+  - global.region
+  - global.bucketName
+  - global.existingSecret
+  - global.database.user
+  - global.database.name
+  - global.publicUrls.auth
+  - global.publicUrls.apiAuth
+  - global.publicUrls.app
+  - global.publicUrls.apiAsmPlus
+  - global.publicUrls.viewer
+  - global.cloudSql.enabled
+  - global.cloudSql.instanceConnectionName
+  - global.cloudSql.serviceAccount.name
+  - global.marketplace.consumptionLabel
+  - global.marketplace.serviceName
+  - global.marketplace.serviceLevel
+
+form:
+  - widget: help
+    description: >-
+      <p>ASM+ is licensed directly by Auritas under BYOL. Before deployment,
+      prepare the existing Cloud SQL instance, Cloud Storage bucket, runtime
+      Secret, and Workload Identity-enabled Kubernetes service account described
+      in the <a href="https://github.com/AuritasLLC/ECOSYSTEM_INFRA_GCP_PUBLIC/blob/main/docs/USER_GUIDE.md">ASM+ Deployment and User Guide</a>.</p>

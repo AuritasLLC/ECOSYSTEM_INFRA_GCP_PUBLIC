@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Release.Name }}-tester"
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/component: marketplace-verification
+    goog-partner-solution: "isol_plb32_0014m00001irgbqqaq_g4sz646dffwwygzqyiappxoc7q5x4tjk"
+  annotations:
+    helm.sh/hook: test-success
+spec:
+  restartPolicy: Never
+  containers:
+    - name: tester
+      image: "{{ required "front-auth image.repository is required" (index .Values "front-auth").image.repository }}:{{ required "front-auth image.tag is required" (index .Values "front-auth").image.tag }}"
+      imagePullPolicy: IfNotPresent
+      command:
+        - /bin/sh
+        - -ec
+      args:
+        - |
+          for attempt in $(seq 1 30); do
+            if wget -qO /tmp/health "http://{{ .Release.Name }}-front-auth/health"; then
+              cat /tmp/health
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "ASM+ authentication frontend health check failed" >&2
+          exit 1
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+          ephemeral-storage: 16Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
+          ephemeral-storage: 64Mi

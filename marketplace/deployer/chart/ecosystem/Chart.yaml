@@ -1,0 +1,44 @@
+apiVersion: v2
+name: ecosystem
+description: ASM+ deployment on Google Kubernetes Engine
+type: application
+version: "0.1.0"
+appVersion: "1.0.0"
+icon: https://raw.githubusercontent.com/AuritasLLC/ECOSYSTEM_INFRA_GCP_PUBLIC/main/assets/asm-plus-logo.png
+
+dependencies:
+  - name: postgresql
+    version: "0.1.0"
+    condition: postgresql.enabled
+
+  - name: asm-api
+    version: "0.1.0"
+    condition: asm-api.enabled
+
+  - name: asm-plus-api
+    version: "0.1.0"
+    condition: asm-plus-api.enabled
+
+  - name: auth-api
+    version: "0.1.0"
+    condition: auth-api.enabled
+
+  - name: front-asm-plus
+    version: "0.1.0"
+    condition: front-asm-plus.enabled
+
+  - name: front-auth
+    version: "0.1.0"
+    condition: front-auth.enabled
+
+  - name: front-viewer
+    version: "0.1.0"
+    condition: front-viewer.enabled
+
+  - name: api-sap
+    version: "0.1.0"
+    condition: api-sap.enabled
+
+  - name: api-sf
+    version: "0.1.0"
+    condition: api-sf.enabled

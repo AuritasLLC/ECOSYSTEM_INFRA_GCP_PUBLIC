@@ -1,0 +1,137 @@
+{{- if .Values.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "api-asm-plus") }}
+  labels:
+    app.kubernetes.io/name: api-asm-plus
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: document-management-api
+spec:
+  replicas: {{ .Values.replicaCount | default 1 }}
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api-asm-plus
+      app.kubernetes.io/instance: {{ .Release.Name }}
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: api-asm-plus
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: document-management-api
+        {{- with .Values.global.marketplace.consumptionLabel }}
+        goog-partner-solution: {{ . | quote }}
+        {{- end }}
+      {{- with .Values.global.marketplace.serviceName }}
+      annotations:
+        cloudmarketplace.googleapis.com/product.metadata: {{ printf "v1:{\"services\":[{\"service_name\":\"%s\",\"service_level\":\"%s\"}]}" . $.Values.global.marketplace.serviceLevel | quote }}
+      {{- end }}
+
+    spec:
+      {{- if .Values.global.cloudSql.enabled }}
+      serviceAccountName: {{ required "global.cloudSql.serviceAccount.name is required" .Values.global.cloudSql.serviceAccount.name }}
+      {{- end }}
+
+      terminationGracePeriodSeconds: 30
+
+      containers:
+        - name: api-asm-plus
+          image: "{{ required "asm-plus-api image.repository is required" .Values.image.repository }}:{{ required "asm-plus-api image.tag is required" .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
+
+          ports:
+            - name: http
+              containerPort: {{ .Values.port | default 3000 }}
+              protocol: TCP
+
+          envFrom:
+            - configMapRef:
+                name: {{ include "ecosystem.resourceName" (list . "asm-plus-api-config") }}
+
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.existingSecret | default "asmplus-runtime-secrets" }}
+                  key: PGPASSWORD
+
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.existingSecret | default "asmplus-runtime-secrets" }}
+                  key: JWT_SECRET
+
+            - name: ASM_MICROSERVICE_ADMIN_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.existingSecret | default "asmplus-runtime-secrets" }}
+                  key: ASM_API_KEY
+
+            - name: VECTOR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.existingSecret | default "asmplus-runtime-secrets" }}
+                  key: VECTOR_API_KEY
+                  optional: true
+
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+        {{- if .Values.global.cloudSql.enabled }}
+        - name: cloud-sql-proxy
+          image: "{{ .Values.global.cloudSql.proxy.repository }}:{{ .Values.global.cloudSql.proxy.tag }}"
+          imagePullPolicy: IfNotPresent
+
+          args:
+            {{- if .Values.global.cloudSql.privateIp }}
+            - "--private-ip"
+            {{- end }}
+            - "--structured-logs"
+            - "--port={{ .Values.global.cloudSql.proxy.port }}"
+            - {{ required "global.cloudSql.instanceConnectionName is required" .Values.global.cloudSql.instanceConnectionName | quote }}
+
+          ports:
+            - name: cloudsql
+              containerPort: {{ .Values.global.cloudSql.proxy.port }}
+              protocol: TCP
+
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+
+          resources:
+            {{- toYaml .Values.global.cloudSql.proxy.resources | nindent 12 }}
+        {{- end }}
+{{- end }}

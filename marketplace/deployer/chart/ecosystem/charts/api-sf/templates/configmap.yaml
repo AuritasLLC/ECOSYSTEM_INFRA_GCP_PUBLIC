@@ -1,0 +1,22 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "api-sf-config") }}
+  labels:
+    app.kubernetes.io/name: api-sf
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: successfactors-api
+data:
+{{- range $key, $value := omit (.Values.config | default dict) "NODE_ENV" "HOST" "PORT" "ASM_MICROSERVICE_URL" "PGHOST" "PGPORT" "PGUSER" "PGDATABASE" }}
+  {{ $key }}: {{ $value | quote }}
+{{- end }}
+  NODE_ENV: "production"
+  HOST: "0.0.0.0"
+  PORT: {{ .Values.port | default 3030 | quote }}
+  ASM_MICROSERVICE_URL: {{ printf "http://%s:3000" (include "ecosystem.resourceName" (list . "asm-api")) | quote }}
+  PGHOST: "127.0.0.1"
+  PGPORT: {{ .Values.global.cloudSql.proxy.port | default 5432 | quote }}
+  PGUSER: {{ required "global.database.user is required" .Values.global.database.user | quote }}
+  PGDATABASE: {{ required "global.database.name is required" .Values.global.database.name | quote }}
+{{- end }}

@@ -8,65 +8,56 @@
 
 ## Overview
 
-Auritas Storage Manager (ASM+) is an enterprise document management application
-for SAP environments. It centralizes document storage and access, connects
-documents with SAP business processes, SAP SuccessFactors, and the Snowflake
-platform, and provides web interfaces for administration, search, and document
-viewing.
+Auritas Storage Manager (ASM+) is an enterprise document and content management
+solution for SAP environments. It elevates content management performance with
+AI-driven analysis, intelligent redaction, metadata management, cross-system
+synchronization, and centralized document lifecycle capabilities, including
+folder creation, upload, search, viewing, version management, workflows,
+notifications, reporting, auditing, and recycle-bin recovery.
 
-ASM Storage API is the central application API. Optional SAP Business and SAP
-SuccessFactors connectors integrate with customer-approved systems and
-credentials.
+ASM Storage API serves as the central content service, while dedicated web
+portals and application APIs manage authentication, users, roles, permissions,
+documents, and business processes. ASM+ integrates with SAP business
+applications through SAP ArchiveLink and with SAP SuccessFactors through
+dedicated repository, document management, and authentication APIs.
 
-## Marketplace delivery and licensing
+On Google Cloud, ASM+ is delivered as a customer-hosted Standard Kubernetes
+application for an existing customer-managed Google Kubernetes Engine (GKE)
+cluster. The application uses Cloud Storage for document content and PostgreSQL
+for application metadata, allowing customers to retain control of their
+infrastructure, data, networking, security configuration, backups, and cloud
+costs.
 
-The current Google Cloud Marketplace product is being prepared as a **Standard
-Kubernetes application** with a **Bring Your Own License (BYOL)** pricing model.
-The Marketplace deployer installs the ASM+ Kubernetes resources into a GKE
-cluster selected by the customer. It does not use Terraform to create a VPC,
-GKE cluster, Cloud SQL instance, Cloud Storage bucket, DNS zone, or project IAM
-configuration.
+## Delivery and licensing
 
-Customers obtain the ASM+ software license directly from Auritas. Google bills
-the customer separately for the Google Cloud infrastructure used by the
-deployment. Auritas is responsible for validating the ASM+ license in the
-application.
+The package uses Helm through a Google Cloud Marketplace deployment container.
+It installs ASM+ workloads into the GKE cluster and namespace selected by the
+customer. It does not use Terraform and does not create a VPC, GKE cluster,
+Cloud SQL instance, Cloud Storage bucket, DNS zone, or project IAM policy.
 
-## Customer-hosted prerequisites
+ASM+ is offered under a Bring Your Own License (BYOL) model. Customers obtain
+the software entitlement directly from Auritas; Google bills the customer
+separately for the Google Cloud resources used by the deployment.
 
-The production deployment profile requires customer-controlled resources that
-exist before the Marketplace deployment begins:
+## Documentation
 
-- A supported x86-based GKE cluster with sufficient CPU, memory, and storage.
-- A PostgreSQL database reachable from the cluster. Cloud SQL for PostgreSQL is
-  the recommended Google Cloud implementation.
-- A Cloud Storage bucket for ASM+ document content.
-- A Kubernetes service account configured through Workload Identity with the
-  approved bucket permissions.
-- Customer-managed DNS, HTTPS certificates, secrets, backups, and network
-  connectivity to any enabled SAP systems.
-- A valid ASM+ BYOL license obtained from Auritas.
-
-See the [deployment and user guide](docs/USER_GUIDE.md) and the
-[Marketplace readiness register](docs/MARKETPLACE_READINESS.md) before using
-the package.
+- [Deployment and user guide](docs/USER_GUIDE.md)
+- [Security and support](SECURITY.md)
+- [Third-party components](docs/THIRD_PARTY_COMPONENTS.md)
+- [Marketplace package source](marketplace/README.md)
 
 ## Repository layout
 
-- `marketplace/deployer/`: Standard Kubernetes deployer source and candidate
-  Helm chart.
-- `docs/USER_GUIDE.md`: customer deployment and operations guide.
-- `docs/MARKETPLACE_READINESS.md`: verified items and release blockers.
-- `docs/THIRD_PARTY_COMPONENTS.md`: third-party component inventory.
-- `legacy/terraform-kubernetes/`: superseded Terraform Kubernetes onboarding
-  material retained for traceability only.
-- `SECURITY.md`: security and support guidance.
+- `marketplace/deployer/`: deployer Dockerfile, Marketplace schema, Helm chart,
+  Application CRD, and verification test.
+- `marketplace/examples/`: non-secret example values.
+- `docs/`: customer documentation and third-party component inventory.
+- `assets/`: documentation logos.
+- `SECURITY.md`: secure support and disclosure guidance.
 
-The Standard Kubernetes package is currently **pre-release**. Do not represent
-it as Google-approved or production-ready until the readiness register shows
-all release gates as complete.
-
-This repository does not contain credentials, customer data, Terraform state,
-or private application source code.
+This repository contains deployment configuration and documentation. It does
+not contain ASM+ application source code, credentials, customer data,
+Terraform state, or Kubernetes Secret values. The Marketplace release remains
+a release candidate until Google completes its review.
 
 Copyright Auritas LLC. All rights reserved.

@@ -1,0 +1,24 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "auth-api-config") }}
+  labels:
+    app.kubernetes.io/name: api-auth
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: authentication-api
+data:
+{{- range $key, $value := omit (.Values.config | default dict) "NODE_ENV" "HOST" "PORT" "PUBLIC_BASE_URL" "CORS_ALLOWED_ORIGINS" "PGHOST" "PGPORT" "PGUSER" "PGDATABASE" "DATABASE_SSL_MODE" }}
+  {{ $key }}: {{ $value | quote }}
+{{- end }}
+  NODE_ENV: "production"
+  HOST: "0.0.0.0"
+  PORT: {{ .Values.port | default 3000 | quote }}
+  PUBLIC_BASE_URL: {{ required "global.publicUrls.apiAuth is required" .Values.global.publicUrls.apiAuth | quote }}
+  CORS_ALLOWED_ORIGINS: {{ printf "%s,%s,%s" .Values.global.publicUrls.auth .Values.global.publicUrls.app .Values.global.publicUrls.viewer | quote }}
+  PGHOST: "127.0.0.1"
+  PGPORT: {{ .Values.global.cloudSql.proxy.port | default 5432 | quote }}
+  PGUSER: {{ required "global.database.user is required" .Values.global.database.user | quote }}
+  PGDATABASE: {{ required "global.database.name is required" .Values.global.database.name | quote }}
+  DATABASE_SSL_MODE: "disable"
+{{- end }}

@@ -1,0 +1,25 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "asm-plus-api-config") }}
+  labels:
+    app.kubernetes.io/name: api-asm-plus
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: document-management-api
+data:
+{{- range $key, $value := omit (.Values.config | default dict) "NODE_ENV" "HOST" "PORT" "BASE_URL" "CORS_ORIGINS" "PGHOST" "PGPORT" "PGUSER" "PGDATABASE" "PGSSLMODE" "ASM_MICROSERVICE_URL" }}
+  {{ $key }}: {{ $value | quote }}
+{{- end }}
+  NODE_ENV: "production"
+  HOST: "0.0.0.0"
+  PORT: {{ .Values.port | default 3000 | quote }}
+  BASE_URL: {{ required "global.publicUrls.apiAsmPlus is required" .Values.global.publicUrls.apiAsmPlus | quote }}
+  CORS_ORIGINS: {{ printf "%s,%s,%s" .Values.global.publicUrls.auth .Values.global.publicUrls.app .Values.global.publicUrls.viewer | quote }}
+  PGHOST: "127.0.0.1"
+  PGPORT: {{ .Values.global.cloudSql.proxy.port | default 5432 | quote }}
+  PGUSER: {{ required "global.database.user is required" .Values.global.database.user | quote }}
+  PGDATABASE: {{ required "global.database.name is required" .Values.global.database.name | quote }}
+  PGSSLMODE: "disable"
+  ASM_MICROSERVICE_URL: {{ printf "http://%s:3000" (include "ecosystem.resourceName" (list . "asm-api")) | quote }}
+{{- end }}

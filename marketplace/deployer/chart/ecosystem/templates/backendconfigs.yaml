@@ -1,0 +1,105 @@
+{{- if .Values.global.ingress.enabled }}
+{{- $apiSap := index .Values "api-sap" -}}
+{{- $apiSf := index .Values "api-sf" -}}
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "front-auth-backend") }}
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /health
+    port: 80
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "api-auth-backend") }}
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /health/db
+    port: 3000
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "front-asm-plus-backend") }}
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /health
+    port: 8080
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "api-asm-plus-backend") }}
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /health/ready
+    port: 3000
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "front-viewer-backend") }}
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /health
+    port: 8080
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+{{- if $apiSap.enabled }}
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "api-sap-backend") }}
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /health
+    port: 3020
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+{{- end }}
+{{- if $apiSf.enabled }}
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "api-sf-backend") }}
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /health
+    port: 3030
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+{{- end }}
+{{- end }}

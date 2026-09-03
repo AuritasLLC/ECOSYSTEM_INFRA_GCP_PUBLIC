@@ -1,0 +1,73 @@
+properties:
+  global.projectId:
+    type: string
+    default: marketplace-verification
+  global.region:
+    type: string
+    default: us-central1
+  global.bucketName:
+    type: string
+    default: asmplus-verification
+  global.existingSecret:
+    type: string
+    default: asmplus-verification-secrets
+  global.database.user:
+    type: string
+    default: auritas
+  global.database.name:
+    type: string
+    default: auritasdemo
+  global.publicUrls.auth:
+    type: string
+    default: https://auth.invalid.example
+  global.publicUrls.apiAuth:
+    type: string
+    default: https://api-auth.invalid.example
+  global.publicUrls.app:
+    type: string
+    default: https://app.invalid.example
+  global.publicUrls.apiAsmPlus:
+    type: string
+    default: https://api-asm-plus.invalid.example
+  global.publicUrls.viewer:
+    type: string
+    default: https://viewer.invalid.example
+  global.cloudSql.instanceConnectionName:
+    type: string
+    default: marketplace-verification:us-central1:unused
+  global.cloudSql.enabled:
+    type: boolean
+    default: false
+  postgresql.enabled:
+    type: boolean
+    default: false
+  asm-api.enabled:
+    type: boolean
+    default: false
+  auth-api.enabled:
+    type: boolean
+    default: false
+  asm-plus-api.enabled:
+    type: boolean
+    default: false
+  front-auth.enabled:
+    type: boolean
+    default: true
+  front-asm-plus.enabled:
+    type: boolean
+    default: false
+  front-viewer.enabled:
+    type: boolean
+    default: false
+  migrations.auth.enabled:
+    type: boolean
+    default: false
+  migrations.asmPlus.enabled:
+    type: boolean
+    default: false
+  api-sap.enabled:
+    type: boolean
+    default: false
+  api-sf.enabled:
+    type: boolean
+    default: false

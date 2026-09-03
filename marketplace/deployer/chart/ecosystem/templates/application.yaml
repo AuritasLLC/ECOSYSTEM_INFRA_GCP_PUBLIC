@@ -1,0 +1,56 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    marketplace.cloud.google.com/deploy-info: '{"partner_id":"auritas","product_id":"asm-plus","partner_name":"Auritas LLC"}'
+  labels:
+    app.kubernetes.io/name: asm-plus
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/part-of: asm-plus
+    {{- with .Values.global.marketplace.consumptionLabel }}
+    goog-partner-solution: {{ . | quote }}
+    {{- end }}
+spec:
+  addOwnerRef: false
+  descriptor:
+    type: ASM+
+    version: {{ .Chart.AppVersion | quote }}
+    description: Auritas ASM+ document management application for SAP environments.
+    maintainers:
+      - name: Auritas
+        email: connect@auritas.com
+        url: https://www.auritas.com/
+    links:
+      - description: Auritas support
+        url: https://www.auritas.com/contact-us/
+    keywords:
+      - SAP
+      - document-management
+      - archive
+    notes: Managed by the ASM+ Google Cloud Marketplace deployment.
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  componentKinds:
+    - group: apps
+      kind: Deployment
+    - group: apps
+      kind: StatefulSet
+    - group: batch
+      kind: Job
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ConfigMap
+    - group: ""
+      kind: Secret
+    - group: networking.k8s.io
+      kind: Ingress
+    - group: networking.gke.io
+      kind: ManagedCertificate
+    - group: networking.gke.io
+      kind: FrontendConfig

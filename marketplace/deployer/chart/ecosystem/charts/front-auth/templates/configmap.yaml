@@ -1,0 +1,17 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "front-auth-config") }}
+  labels:
+    app.kubernetes.io/name: front-auth
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: authentication-frontend
+data:
+{{- range $key, $value := omit (.Values.config | default dict) "API_BASE_URL" "ROUTER_BASENAME" "NGINX_PORT" }}
+  {{ $key }}: {{ $value | quote }}
+{{- end }}
+  API_BASE_URL: {{ required "global.publicUrls.apiAuth is required" .Values.global.publicUrls.apiAuth | quote }}
+  ROUTER_BASENAME: "/"
+  NGINX_PORT: {{ .Values.port | default 80 | quote }}
+{{- end }}

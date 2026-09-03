@@ -1,0 +1,79 @@
+{{- if .Values.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "asm-api") }}
+  labels:
+    app.kubernetes.io/name: asm-api
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: storage-api
+spec:
+  replicas: {{ .Values.replicaCount | default 1 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: asm-api
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: asm-api
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: storage-api
+        {{- with .Values.global.marketplace.consumptionLabel }}
+        goog-partner-solution: {{ . | quote }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ required "global.cloudSql.serviceAccount.name is required" .Values.global.cloudSql.serviceAccount.name }}
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: asm-api
+          image: "{{ required "asm-api image.repository is required" .Values.image.repository }}:{{ required "asm-api image.tag is required" .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.port | default 3000 }}
+              protocol: TCP
+
+          envFrom:
+            - configMapRef:
+                name: {{ include "ecosystem.resourceName" (list . "asm-api-config") }}
+
+          env:
+            - name: ASM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.existingSecret | default "asmplus-runtime-secrets" }}
+                  key: ASM_API_KEY
+
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+{{- end }}
