@@ -1,0 +1,13 @@
+{{- if and .Values.global.ingress.enabled .Values.global.ingress.frontendConfigName }}
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "frontend-config") }}
+  labels:
+    app.kubernetes.io/name: asm-plus
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  redirectToHttps:
+    enabled: true
+    responseCodeName: PERMANENT_REDIRECT
+{{- end }}

@@ -1,0 +1,13 @@
+{{- if .Values.migrations.auth.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . (printf "auth-migration-sql-%s" (.Release.Revision | toString))) }}
+  labels:
+    app.kubernetes.io/name: auth-migration
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: database-migration
+data:
+  001_auth_schema.sql: |-
+{{ required "files/001_auth_schema.sql is required when Auth migration is enabled" (.Files.Get "files/001_auth_schema.sql") | nindent 4 }}
+{{- end }}

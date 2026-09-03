@@ -1,0 +1,106 @@
+{{- if .Values.global.ingress.enabled }}
+{{- $apiSap := index .Values "api-sap" -}}
+{{- $apiSf := index .Values "api-sf" -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "ingress") }}
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: {{ .Values.global.ingress.staticIpName | quote }}
+    kubernetes.io/ingress.allow-http: {{ .Values.global.ingress.allowHttp | quote }}
+    {{- if .Values.global.ingress.frontendConfigName }}
+    networking.gke.io/v1beta1.FrontendConfig: {{ include "ecosystem.resourceName" (list . "frontend-config") | quote }}
+    {{- end }}
+    {{- if .Values.global.ingress.tls.enabled }}
+    networking.gke.io/managed-certificates: {{ include "ecosystem.resourceName" (list . "managed-certificate") | quote }}
+    {{- end }}
+
+spec:
+  defaultBackend:
+    service:
+      name: {{ include "ecosystem.resourceName" (list . "front-asm-plus") }}
+      port:
+        number: 8080
+
+  rules:
+    - host: {{ .Values.global.ingress.hosts.auth | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "ecosystem.resourceName" (list . "front-auth") }}
+                port:
+                  number: 80
+
+    - host: {{ .Values.global.ingress.hosts.apiAuth | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "ecosystem.resourceName" (list . "api-auth") }}
+                port:
+                  number: 3000
+
+    - host: {{ .Values.global.ingress.hosts.app | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "ecosystem.resourceName" (list . "front-asm-plus") }}
+                port:
+                  number: 8080
+
+    - host: {{ .Values.global.ingress.hosts.apiAsmPlus | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "ecosystem.resourceName" (list . "api-asm-plus") }}
+                port:
+                  number: 3000
+
+    - host: {{ .Values.global.ingress.hosts.viewer | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "ecosystem.resourceName" (list . "front-viewer") }}
+                port:
+                  number: 8080
+    {{- if $apiSap.enabled }}
+    - host: {{ .Values.global.ingress.hosts.apiSap | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "ecosystem.resourceName" (list . "api-sap") }}
+                port:
+                  number: 3020
+    {{- end }}
+
+    {{- if $apiSf.enabled }}
+    - host: {{ .Values.global.ingress.hosts.apiSf | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "ecosystem.resourceName" (list . "api-sf") }}
+                port:
+                  number: 3030
+    {{- end }}
+{{- end }}

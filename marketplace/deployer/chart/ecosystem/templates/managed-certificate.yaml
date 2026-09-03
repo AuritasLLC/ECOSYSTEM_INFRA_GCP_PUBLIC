@@ -1,0 +1,24 @@
+{{- if and .Values.global.ingress.enabled .Values.global.ingress.tls.enabled }}
+{{- $apiSap := index .Values "api-sap" -}}
+{{- $apiSf := index .Values "api-sf" -}}
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "managed-certificate") }}
+  labels:
+    app.kubernetes.io/name: asm-plus
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  domains:
+    - {{ .Values.global.ingress.hosts.auth | quote }}
+    - {{ .Values.global.ingress.hosts.apiAuth | quote }}
+    - {{ .Values.global.ingress.hosts.app | quote }}
+    - {{ .Values.global.ingress.hosts.apiAsmPlus | quote }}
+    {{- if $apiSap.enabled }}
+    - {{ .Values.global.ingress.hosts.apiSap | quote }}
+    {{- end }}
+    {{- if $apiSf.enabled }}
+    - {{ .Values.global.ingress.hosts.apiSf | quote }}
+    {{- end }}
+    - {{ .Values.global.ingress.hosts.viewer | quote }}
+{{- end }}

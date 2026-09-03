@@ -1,0 +1,29 @@
+global:
+  applicationResource:
+    enabled: false
+
+postgresql:
+  enabled: false
+
+asm-api:
+  enabled: false
+auth-api:
+  enabled: false
+asm-plus-api:
+  enabled: false
+front-auth:
+  enabled: false
+front-asm-plus:
+  enabled: false
+front-viewer:
+  enabled: false
+api-sap:
+  enabled: false
+api-sf:
+  enabled: false
+
+migrations:
+  auth:
+    enabled: true
+  asmPlus:
+    enabled: true

@@ -1,0 +1,20 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "front-viewer-config") }}
+  labels:
+    app.kubernetes.io/name: front-viewer
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: document-viewer
+data:
+{{- range $key, $value := omit (.Values.config | default dict) "PORT" "API_BASE_URL_PLUS" "BASE_AUTH_API" "SSO_URL" "SSO_MODE" "ROUTER_BASENAME" }}
+  {{ $key }}: {{ $value | quote }}
+{{- end }}
+  PORT: {{ .Values.port | default 8080 | quote }}
+  ROUTER_BASENAME: "/"
+  API_BASE_URL_PLUS: {{ printf "%s/api/file" (trimSuffix "/" .Values.global.publicUrls.apiAsmPlus) | quote }}
+  BASE_AUTH_API: {{ required "global.publicUrls.apiAuth is required" .Values.global.publicUrls.apiAuth | quote }}
+  SSO_URL: {{ printf "%s/sso?redirect={redirect}" (trimSuffix "/" .Values.global.publicUrls.auth) | quote }}
+  SSO_MODE: "redirect"
+{{- end }}

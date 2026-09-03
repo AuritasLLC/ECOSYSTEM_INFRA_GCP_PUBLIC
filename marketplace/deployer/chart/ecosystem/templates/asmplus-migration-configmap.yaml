@@ -1,0 +1,15 @@
+{{- if .Values.migrations.asmPlus.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . (printf "asmplus-migration-sql-%s" (.Release.Revision | toString))) }}
+  labels:
+    app.kubernetes.io/name: asmplus-migration
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: database-migration
+data:
+  001_auth_schema.sql: |-
+{{ required "files/001_auth_schema.sql is required when ASM+ migration is enabled" (.Files.Get "files/001_auth_schema.sql") | nindent 4 }}
+  002_document_storage_schema.sql: |-
+{{ required "files/002_document_storage_schema.sql is required when ASM+ migration is enabled" (.Files.Get "files/002_document_storage_schema.sql") | nindent 4 }}
+{{- end }}

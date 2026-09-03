@@ -1,0 +1,126 @@
+{{- if .Values.migrations.auth.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . (printf "auth-migration-%s" (.Release.Revision | toString))) }}
+  labels:
+    app.kubernetes.io/name: auth-migration
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: database-migration
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 900
+  ttlSecondsAfterFinished: 600
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-migration
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: database-migration
+        {{- with .Values.global.marketplace.consumptionLabel }}
+        goog-partner-solution: {{ . | quote }}
+        {{- end }}
+
+    spec:
+      serviceAccountName: {{ required "global.cloudSql.serviceAccount.name is required" .Values.global.cloudSql.serviceAccount.name }}
+      restartPolicy: Never
+
+      initContainers:
+        - name: cloud-sql-proxy
+          restartPolicy: Always
+
+          image: "{{ required "global.cloudSql.proxy.repository is required" .Values.global.cloudSql.proxy.repository }}:{{ required "global.cloudSql.proxy.tag is required" .Values.global.cloudSql.proxy.tag }}"
+          imagePullPolicy: IfNotPresent
+
+          args:
+            {{- if .Values.global.cloudSql.privateIp }}
+            - "--private-ip"
+            {{- end }}
+            - "--structured-logs"
+            - "--port={{ .Values.global.cloudSql.proxy.port | default 5432 }}"
+            - {{ required "global.cloudSql.instanceConnectionName is required" .Values.global.cloudSql.instanceConnectionName | quote }}
+
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+
+          resources:
+            {{- toYaml .Values.global.cloudSql.proxy.resources | nindent 12 }}
+
+      containers:
+        - name: auth-migration
+          image: "{{ required "postgresql.image.repository is required" .Values.postgresql.image.repository }}:{{ required "postgresql.image.tag is required" .Values.postgresql.image.tag }}"
+          imagePullPolicy: IfNotPresent
+
+          command:
+            - /bin/sh
+            - -c
+
+          args:
+            - |
+              set -eu
+
+              echo "Waiting for Cloud SQL Auth Proxy"
+
+              until pg_isready \
+                -h "$PGHOST" \
+                -p "$PGPORT" \
+                -U "$PGUSER" \
+                -d "$PGDATABASE"
+              do
+                echo "Cloud SQL Proxy is not ready yet"
+                sleep 2
+              done
+
+              echo "Cloud SQL Proxy is ready"
+              echo "Running Auth migration"
+
+              psql \
+                -v ON_ERROR_STOP=1 \
+                -f /migrations/001_auth_schema.sql
+
+              echo "Auth migration completed"
+
+          env:
+            - name: PGHOST
+              value: "127.0.0.1"
+
+            - name: PGPORT
+              value: {{ .Values.global.cloudSql.proxy.port | default 5432 | quote }}
+
+            - name: PGUSER
+              value: {{ required "global.database.user is required" .Values.global.database.user | quote }}
+
+            - name: PGDATABASE
+              value: {{ required "global.database.name is required" .Values.global.database.name | quote }}
+
+            - name: PGSSLMODE
+              value: disable
+
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.existingSecret | default "asmplus-runtime-secrets" }}
+                  key: PGPASSWORD
+
+          volumeMounts:
+            - name: migration-sql
+              mountPath: /migrations
+              readOnly: true
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+              ephemeral-storage: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+              ephemeral-storage: 512Mi
+
+      volumes:
+        - name: migration-sql
+          configMap:
+            name: {{ include "ecosystem.resourceName" (list . (printf "auth-migration-sql-%s" (.Release.Revision | toString))) }}
+{{- end }}

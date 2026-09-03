@@ -1,0 +1,22 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ecosystem.resourceName" (list . "asm-api-config") }}
+  labels:
+    app.kubernetes.io/name: asm-api
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: storage-api
+data:
+{{- range $key, $value := omit (.Values.config | default dict) "NODE_ENV" "HOST" "PORT" "CORS_ALLOWED_ORIGINS" "BTP_HYPERSCALER" "STORAGE_PROVIDER" "GCS_BUCKET" "GOOGLE_CLOUD_PROJECT" }}
+  {{ $key }}: {{ $value | quote }}
+{{- end }}
+  NODE_ENV: "production"
+  HOST: "0.0.0.0"
+  PORT: {{ .Values.port | default 3000 | quote }}
+  CORS_ALLOWED_ORIGINS: {{ printf "%s,%s" .Values.global.publicUrls.app .Values.global.publicUrls.viewer | quote }}
+  BTP_HYPERSCALER: "GCP"
+  STORAGE_PROVIDER: "gcs"
+  GCS_BUCKET: {{ required "global.bucketName is required" .Values.global.bucketName | quote }}
+  GOOGLE_CLOUD_PROJECT: {{ required "global.projectId is required" .Values.global.projectId | quote }}
+{{- end }}

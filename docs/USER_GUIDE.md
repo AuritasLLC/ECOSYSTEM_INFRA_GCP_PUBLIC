@@ -1,260 +1,283 @@
-# ASM+ on Google Cloud: Standard Kubernetes Deployment and User Guide
+# ASM+ on Google Cloud: Deployment and User Guide
 
-This guide covers the installation and operation of **Auritas Storage Manager
-(ASM+)** as a Google Cloud Marketplace Standard Kubernetes application.
+This guide covers Auritas Storage Manager (ASM+) as a Google Cloud Marketplace
+Standard Kubernetes application.
 
 - Publisher: Auritas LLC
 - Pricing model: Bring Your Own License (BYOL)
 - Support: [Auritas contact page](https://www.auritas.com/contact-us/) or
-  `sales@auritas.com`
-- Marketplace listing: added here after the Standard Kubernetes product is
-  approved and published
+  `connect@auritas.com`
+- Release track: `1.0`
 
-## 1. Overview
+## 1. Solution scope
 
-ASM+ centralizes document storage and access for SAP environments and provides
-administration, search, and document-viewing web interfaces. ASM Storage API is
-the central application API. Optional workloads connect ASM+ to SAP Business
-and SAP SuccessFactors using customer-approved endpoints and credentials.
+ASM+ centralizes document and content management for SAP environments. The ASM
+Storage API is the central content service. The standard installation also
+contains authentication, document-management, administration, and document
+viewer workloads. SAP Business and SAP SuccessFactors connectors are optional.
 
-The Marketplace package installs the ASM+ Kubernetes resources into a GKE
-cluster selected by the customer. It does not create Google Cloud
-infrastructure with Terraform. The customer retains control of the project,
-cluster, database, object storage, networking, secrets, backups, scaling, and
-Google Cloud resource costs.
+The Marketplace package installs Kubernetes resources into an existing GKE
+cluster selected by the customer. It does not provision the Google Cloud
+project, VPC, GKE cluster, Cloud SQL instance, Cloud Storage bucket, DNS, or IAM
+policies. Those resources remain under customer control.
 
-## 2. BYOL license
+## 2. Licensing
 
-Customers pay Auritas directly for the ASM+ software license and pay Google
-separately for the Google Cloud resources they use. Before deployment, obtain a
-license through the license acquisition URL shown on the Marketplace listing.
+ASM+ uses BYOL. Google does not collect the ASM+ software license fee. Before
+deployment, obtain a valid commercial entitlement from Auritas through the
+[Auritas contact page](https://www.auritas.com/contact-us/). Google bills the
+customer separately for the Google Cloud resources used by the solution.
 
-Auritas must provide the final license format, activation procedure, validation
-endpoint, renewal behavior, and failure behavior before release. Never commit a
-license value to this repository or pass one in shell history. Store it in a
-Kubernetes Secret in the deployment namespace using the procedure supplied with
-the approved Marketplace release.
+The deployment form does not request a license key. Auritas provides the
+applicable entitlement and activation instructions during customer onboarding.
+Do not place licensing material in this repository, a values file, command
+history, logs, or a support ticket.
 
-## 3. One-time customer setup
+## 3. Customer-managed prerequisites
 
-Prepare the following customer-controlled resources:
+Prepare the following resources before opening the deployment form:
 
 1. A billing-enabled Google Cloud project.
-2. A supported x86-based GKE cluster and `kubectl` access to it.
-3. Helm 3 on the administrative workstation if using the CLI installation.
-4. The `Application` CRD required by Google Cloud Marketplace.
-5. A PostgreSQL database reachable from GKE. Cloud SQL for PostgreSQL is
-   recommended for production.
-6. A Cloud Storage bucket for ASM+ document content.
-7. A Kubernetes service account mapped through Workload Identity to a Google
-   service account with the approved bucket permissions.
-8. Customer-managed secrets containing the database, JWT, API, initial
-   administrator, frontend client, and BYOL license values required by the
-   approved release.
-9. Customer-managed DNS names and HTTPS certificates for externally exposed
-   ASM+ endpoints.
-10. Private or public connectivity, as approved by the customer, to any SAP
-    Business or SAP SuccessFactors systems being enabled.
+2. An x86-based GKE cluster with sufficient CPU and memory.
+3. A namespace in that cluster, or permission to create one.
+4. A PostgreSQL database reachable from GKE. Cloud SQL for PostgreSQL is the
+   recommended managed implementation.
+5. A Cloud Storage bucket for document content.
+6. A Kubernetes service account configured through Workload Identity with
+   access to the required Cloud SQL instance and Cloud Storage bucket.
+7. A Kubernetes Secret containing the runtime values listed in Section 4.
+8. Customer-managed ingress, DNS, and TLS for any externally exposed endpoint.
+9. Network connectivity and credentials for each enabled SAP integration.
+10. A valid ASM+ BYOL entitlement.
 
-The release targets `linux/amd64`. ARM-based GKE nodes are not supported by the
-current image set.
+The Helm chart includes the Google Cloud Marketplace `Application` CRD. If the
+cluster administrator manages CRDs separately, the exact bundled file is:
 
-Install the Marketplace `Application` CRD once per cluster using the exact CRD
-published with the approved release:
-
-```bash
-kubectl apply -f marketplace/deployer/chart/ecosystem/crds/application-crd.yaml
-kubectl get crd applications.app.k8s.io
+```text
+marketplace/deployer/chart/ecosystem/crds/application-crd.yaml
 ```
 
-## 4. Pre-deployment checks
+## 4. Runtime Secret
 
-Confirm the active cluster and available capacity:
+Create the Secret in the target namespace before deployment. Use an approved
+secret-management process; do not commit Secret values to Git.
+
+Required for the core installation:
+
+- `PGPASSWORD`: PostgreSQL password.
+- `JWT_SECRET`: signing secret used by the authentication and ASM+ APIs.
+- `ASM_API_KEY`: key used for protected communication with ASM Storage API.
+- `AUTH_SUPER_ADMIN_PASSWORD`: initial administrator bootstrap password.
+- `AUTH_CLIENT_KEY`: authentication client key.
+
+Optional keys:
+
+- `AUTH_CLIENT_KEY_FRONT_AUTH`: separate authentication portal client key.
+- `VECTOR_API_KEY`: required only when an approved vector integration is used.
+- `SAP_BASIC_AUTH_USERS_JSON`: required when the SAP Business connector is
+  enabled.
+- `SF_MANAGED_USERS_JSON`: required when the SAP SuccessFactors connector is
+  enabled.
+
+Verify only the key names, never their values:
+
+```bash
+kubectl -n "ASMPLUS_NAMESPACE" describe secret "ASMPLUS_SECRET_NAME"
+```
+
+## 5. Deployment form parameters
+
+The Marketplace form and deployer use the following customer inputs:
+
+| Parameter | Required | Purpose |
+| --- | --- | --- |
+| Application name | Yes | Prefix used in every ASM+ Kubernetes resource name. |
+| Namespace | Yes | Target namespace selected by the customer. |
+| Google Cloud project ID | Yes | Project containing the target cluster and customer resources. |
+| Google Cloud region | Yes | Region of the customer-managed data services. |
+| Existing Cloud Storage bucket | Yes | Bucket used by ASM Storage API for document content. |
+| Existing ASM+ Kubernetes Secret | Yes | Name of the pre-created runtime Secret. |
+| PostgreSQL user | Yes | Existing database login used through the Cloud SQL Auth Proxy. |
+| PostgreSQL database | Yes | Existing database used for ASM+ metadata. |
+| Cloud SQL instance connection name | Yes | `PROJECT:REGION:INSTANCE` identifier. |
+| ASM+ Kubernetes service account | Yes | Existing Workload Identity-enabled service account. |
+| Use Cloud SQL private IP | No | Selects the private IP path; enabled by default. |
+| Five core public URLs | Yes | Approved HTTPS URLs for the auth portal, Auth API, ASM+ UI, ASM+ API, and viewer. |
+| SAP connector URLs | No | Optional HTTPS URLs used only when those connectors are enabled. |
+| Core component toggles | No | Core APIs and frontends are enabled by default. |
+| SAP Business connector | No | Optional and disabled by default. |
+| SAP SuccessFactors connector | No | Optional and disabled by default. |
+
+Marketplace supplies the approved image locations, deployment-container image,
+product service annotation, and consumption-tracking label. Customers do not
+enter or change those release-controlled values.
+
+## 6. Pre-deployment checks
+
+Confirm the active cluster and authorization:
 
 ```bash
 kubectl config current-context
 kubectl get nodes -o wide
 kubectl auth can-i create deployments --namespace "ASMPLUS_NAMESPACE"
 kubectl auth can-i create services --namespace "ASMPLUS_NAMESPACE"
+kubectl auth can-i create applications.app.k8s.io --namespace "ASMPLUS_NAMESPACE"
 ```
 
-Confirm that the selected Kubernetes service account exists and is mapped to
-the approved Google service account:
+Confirm the pre-created service account and Secret exist:
 
 ```bash
-kubectl -n "ASMPLUS_NAMESPACE" get serviceaccount "ASMPLUS_SERVICE_ACCOUNT" -o yaml
+kubectl -n "ASMPLUS_NAMESPACE" get serviceaccount "ASMPLUS_SERVICE_ACCOUNT"
+kubectl -n "ASMPLUS_NAMESPACE" get secret "ASMPLUS_SECRET_NAME"
 ```
 
-From an authorized diagnostic Pod or administrative environment, verify that
-PostgreSQL is reachable and that the Cloud Storage bucket is accessible. Do not
-print credentials or license material in diagnostic output.
+Verify privately that the cluster can reach Cloud SQL and that the mapped
+Google service account can access the selected bucket. Do not print credentials
+or customer content in diagnostic output.
 
-## 5. Deploy from Google Cloud Marketplace
+## 7. Deploy from Google Cloud Marketplace
 
-After Google approves and publishes the Standard Kubernetes release:
-
-1. Open the ASM+ listing in Google Cloud Marketplace.
-2. Acquire or confirm the ASM+ BYOL license through the displayed Auritas URL.
+1. Open the published ASM+ listing in Google Cloud Marketplace.
+2. Review the BYOL terms and obtain an ASM+ entitlement from Auritas.
 3. Select **Configure** or **Deploy**.
 4. Select the customer project, GKE cluster, namespace, and application name.
-5. Supply only the non-secret configuration requested by the deployment form.
-6. Select the preconfigured Kubernetes service account and the existing Secret
-   names required by the release.
-7. Review the customer infrastructure charges and deployment summary.
-8. Deploy and wait for the deployer, migrations, and application workloads to
-   become healthy.
+5. Enter the existing bucket, Secret, Cloud SQL connection name, and Kubernetes
+   service account.
+6. Enable only the integrations approved for that customer.
+7. Review Google Cloud infrastructure charges and the deployment summary.
+8. Start the deployment and wait for Marketplace verification to finish.
 
-Use only an approved release and the images republished by Google Cloud
-Marketplace. Development images and mutable tags are not supported.
+Use only release images supplied through Google Cloud Marketplace. Development
+images and mutable development tags are not supported.
 
-## 6. Deploy from the command line
+### Command-line deployment
 
-The commands in this section become authoritative only after Google publishes
-the release image locations. Clone the repository and check out the exact tag
-associated with the Marketplace release:
+The published Marketplace listing provides a **Deploy via command line** tab.
+Select the same project, cluster, namespace, application name, and parameters
+described above, then copy the generated command. The generated command supplies
+the approved deployment-container image and release-controlled image mappings;
+do not replace them with Docker Hub or development image references.
+
+Before running the generated command, configure `gcloud` and `kubectl` for the
+customer cluster:
 
 ```bash
-git clone https://github.com/AuritasLLC/ECOSYSTEM_INFRA_GCP.git
-cd ECOSYSTEM_INFRA_GCP
-git checkout "RELEASE_TAG"
+gcloud config set project "CUSTOMER_PROJECT_ID"
+gcloud container clusters get-credentials "GKE_CLUSTER" \
+  --region "GKE_REGION" \
+  --project "CUSTOMER_PROJECT_ID"
+kubectl config current-context
 ```
 
-Create a protected values file from the approved example. Populate only
-customer-specific, non-secret values and reference existing Secret and service
-account names:
+Run the exact Marketplace-generated deployment command. Retain the generated
+parameter file in the customer's protected change record only if it contains no
+Secret values. After installation, confirm that every running container resolves
+to an immutable `sha256` image ID as shown in Section 8.
+
+## 8. Validate the installation
+
+The application name prefixes all created resource names. Replace the example
+values below with the selections made in the Marketplace form.
 
 ```bash
-cp marketplace/examples/values.customer.example.yaml values.customer.yaml
-chmod 600 values.customer.yaml
-```
-
-Render the chart locally before installation:
-
-```bash
-helm lint marketplace/deployer/chart/ecosystem \
-  --values values.customer.yaml
-
-helm template "ASMPLUS_RELEASE_NAME" \
-  marketplace/deployer/chart/ecosystem \
-  --namespace "ASMPLUS_NAMESPACE" \
-  --values values.customer.yaml > rendered-asmplus.yaml
-```
-
-Inspect the rendered manifests for unexpected namespaces, image sources,
-cluster-scoped resources, plaintext credentials, and mutable image references.
-Then install the approved chart:
-
-```bash
-helm upgrade --install "ASMPLUS_RELEASE_NAME" \
-  marketplace/deployer/chart/ecosystem \
-  --namespace "ASMPLUS_NAMESPACE" \
-  --create-namespace \
-  --values values.customer.yaml \
-  --wait \
-  --timeout 30m
-```
-
-Do not use these commands with the pre-release chart until the
-[readiness register](MARKETPLACE_READINESS.md) marks the package ready.
-
-## 7. Verify the deployment
-
-```bash
-kubectl -n "ASMPLUS_NAMESPACE" get \
-  applications.app.k8s.io,pods,services,ingress
-
+kubectl -n "ASMPLUS_NAMESPACE" get applications.app.k8s.io
+kubectl -n "ASMPLUS_NAMESPACE" get deployments,statefulsets,jobs,pods,services
+kubectl -n "ASMPLUS_NAMESPACE" get events --sort-by=.lastTimestamp
 kubectl -n "ASMPLUS_NAMESPACE" get pods \
   -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{range .status.containerStatuses[*]}{"  "}{.name}{": "}{.imageID}{"\n"}{end}{end}'
 ```
 
-All required Pods must be `Ready`, migration Jobs must complete, and the
-`Application` resource must report the approved version. Every application
-image must resolve to the immutable digest republished for that release.
+All enabled Deployments must become Available, all required Pods must become
+Ready, and migration Jobs must complete successfully. For troubleshooting, use
+sanitized output only:
 
-Run the approved functional checks:
+```bash
+kubectl -n "ASMPLUS_NAMESPACE" describe application "ASMPLUS_APPLICATION_NAME"
+kubectl -n "ASMPLUS_NAMESPACE" get pods \
+  -l app.kubernetes.io/instance="ASMPLUS_APPLICATION_NAME"
+```
+
+## 9. Network access, DNS, and TLS
+
+The package creates ClusterIP services. The customer is responsible for the
+approved ingress or gateway, public or private DNS records, certificates, and
+firewall policy. Do not expose production endpoints over plaintext HTTP.
+
+After customer-managed access is configured, validate the following enabled
+functions with non-sensitive test data:
 
 1. Sign in through the authentication portal.
-2. Confirm that the Documents page loads without a backend error.
-3. Upload a non-sensitive test document.
-4. Search for it and open it in the document viewer.
-5. Delete it and verify the expected recycle-bin behavior.
+2. Load the Documents page without a backend error.
+3. Upload a test document.
+4. Search for and open the document in the viewer.
+5. Verify versioning, deletion, and recycle-bin recovery as applicable.
+6. Validate each enabled SAP integration with customer-approved test records.
 
-Use synthetic or customer-approved test content only.
+## 10. Initial administration
 
-## 8. DNS and TLS
+Use the customer-approved secret workflow to retrieve the initial administrator
+credential. Sign in, replace the bootstrap password immediately, and confirm
+the administrator's roles and permissions. Do not copy credentials into a
+values file, Git repository, support case, or command line.
 
-The Standard Kubernetes package does not register customer DNS records. Point
-each approved hostname to the ingress address created or selected for the
-deployment. Configure TLS using the customer's approved certificate and
-ingress process.
+## 11. Backup and restore
 
-Verify DNS, TLS, and application reachability:
+A complete recovery set includes:
 
-```bash
-dig +short "APP_HOSTNAME"
-kubectl -n "ASMPLUS_NAMESPACE" get ingress
-curl --fail --head "https://APP_HOSTNAME/"
-```
+- PostgreSQL data and database configuration.
+- Cloud Storage document objects and applicable object versions.
+- Required Kubernetes Secret material held in the customer's approved secret
+  backup system.
+- DNS, TLS, Workload Identity, network, and integration configuration.
+- The exact Marketplace release identifier.
 
-Do not expose production endpoints over plaintext HTTP.
+Test PostgreSQL and object restoration together in a non-production
+environment. A database-only or bucket-only backup is not a complete ASM+
+recovery set.
 
-## 9. Initial access and basic usage
+## 12. Scaling and updates
 
-Retrieve the generated or customer-provided initial administrator credential
-through the customer's approved secret-management workflow. Sign in, change
-the initial password, and confirm the assigned administrator email and roles.
+Scale GKE, Cloud SQL, and Cloud Storage through the customer's infrastructure
+process. Before an ASM+ update, review release notes, create restorable backups,
+test the new Marketplace release in a non-production environment, and repeat the
+functional checks in Section 9.
 
-Do not place database passwords, JWT secrets, API keys, frontend client keys,
-or BYOL license material in a values file, Git repository, support ticket, or
-command line.
-
-## 10. Backup and restore
-
-Back up the PostgreSQL database, Cloud Storage content, required Kubernetes
-Secrets, BYOL activation information, DNS/TLS configuration, and the exact
-Marketplace release identifier. Use customer-approved retention, encryption,
-and access controls.
-
-Test database and object restoration together in a non-production environment.
-A database-only or bucket-only backup is not a complete ASM+ recovery set.
-
-## 11. Updates and scaling
-
-For a patch or minor update:
-
-1. Review the release notes and image digests.
-2. Test the release in a non-production cluster.
-3. Back up the database, document storage, and required Secrets.
-4. Update only to the approved Marketplace release.
-5. Repeat the readiness, login, upload, search, viewer, and integration tests.
-
-Scale workloads by changing the approved replica and resource values. Scale
-Cloud SQL, GKE, and Cloud Storage using the customer's infrastructure process;
-those resources are outside the Standard Kubernetes deployment.
-
-## 12. Delete ASM+
-
-Deletion is destructive. First verify restorable backups and determine whether
-the customer must retain database records, document objects, Secrets, license
-records, DNS entries, or certificates.
-
-Delete the Helm release:
+For an approved temporary replica change, use the application-prefixed
+Deployment name and record the change so it can be reapplied after an update:
 
 ```bash
-helm uninstall "ASMPLUS_RELEASE_NAME" --namespace "ASMPLUS_NAMESPACE"
+kubectl -n "ASMPLUS_NAMESPACE" scale deployment \
+  "ASMPLUS_APPLICATION_NAME-api-asm-plus" --replicas=2
+kubectl -n "ASMPLUS_NAMESPACE" rollout status deployment \
+  "ASMPLUS_APPLICATION_NAME-api-asm-plus"
 ```
 
-Confirm that namespaced application resources are removed. Delete intentionally
-retained PersistentVolumeClaims only after separate approval. Customer-owned
-Cloud SQL instances, Cloud Storage buckets, IAM bindings, DNS records, and
-backups are not deleted by uninstalling the Standard Kubernetes application.
+Do not edit Marketplace-controlled image references or remove the
+`goog-partner-solution` label from Pod templates.
 
-## 13. Support information
+## 13. Uninstall
 
-For support, provide the Marketplace product and release, customer project ID,
-GKE cluster and namespace, approximate failure time and time zone, and sanitized
-Kubernetes errors. Never send passwords, tokens, Secret payloads, private keys,
-license material, or unredacted customer documents.
+Uninstalling is destructive to Kubernetes workloads. First confirm backup and
+retention requirements. Delete the application through Google Cloud Marketplace
+or the supported Helm release workflow used for the installation:
+
+```bash
+helm uninstall "ASMPLUS_APPLICATION_NAME" --namespace "ASMPLUS_NAMESPACE"
+kubectl -n "ASMPLUS_NAMESPACE" get all \
+  -l app.kubernetes.io/instance="ASMPLUS_APPLICATION_NAME"
+```
+
+Customer-owned Cloud SQL instances, Cloud Storage buckets, IAM bindings, DNS
+records, certificates, backups, and pre-created Secrets are not deleted by the
+ASM+ package and must be retained or removed through the customer's own change
+process.
+
+## 14. Support
+
+When contacting support, include the Marketplace release, customer project ID,
+cluster, namespace, application name, approximate failure time and time zone,
+and sanitized Kubernetes errors. Never send passwords, tokens, Secret payloads,
+private keys, license material, or unredacted customer documents.
 
 Contact [Auritas](https://www.auritas.com/contact-us/) or email
 `connect@auritas.com`.

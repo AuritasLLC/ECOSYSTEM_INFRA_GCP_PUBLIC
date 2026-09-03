@@ -1,0 +1,14 @@
+# Customer-specific deployment files
+values.customer.yaml
+rendered-*.yaml
+
+# Secret and local environment files
+.env
+.env.*
+*.pem
+*.key
+*.p12
+
+# Local tool output
+.DS_Store
+Thumbs.db

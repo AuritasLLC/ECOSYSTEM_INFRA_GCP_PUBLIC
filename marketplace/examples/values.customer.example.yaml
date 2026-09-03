@@ -1,0 +1,108 @@
+# PRE-RELEASE EXAMPLE
+#
+# This file documents the categories of values expected by the Standard
+# Kubernetes package. It is not a production values file and intentionally
+# contains no credentials, license values, or final Marketplace image paths.
+
+global:
+  projectId: your-customer-project
+  region: us-east1
+  namespace: asm-plus
+  bucketName: your-existing-asmplus-bucket
+  existingSecret: your-existing-asmplus-secret
+  database:
+    user: auritas
+    name: auritasdemo
+  publicUrls:
+    auth: https://auth.asmplus.example.com
+    apiAuth: https://api-auth.asmplus.example.com
+    app: https://app.asmplus.example.com
+    apiAsmPlus: https://api-asm-plus.asmplus.example.com
+    viewer: https://viewer.asmplus.example.com
+    apiSap: ""
+    apiSf: ""
+
+  applicationResource:
+    enabled: true
+
+  ingress:
+    enabled: false
+
+  cloudSql:
+    enabled: true
+    instanceConnectionName: your-project:us-east1:your-postgresql-instance
+    privateIp: true
+    serviceAccount:
+      # This Kubernetes service account must already exist and be configured
+      # through Workload Identity for Cloud SQL and Cloud Storage access.
+      name: your-preconfigured-kubernetes-service-account
+      gsaEmail: your-google-service-account@your-project.iam.gserviceaccount.com
+    proxy:
+      repository: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+      tag: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+      port: 5432
+
+postgresql:
+  enabled: false
+  # The approved release uses this image as the PostgreSQL migration client
+  # even when the in-cluster database is disabled.
+  image:
+    repository: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+    tag: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+
+asm-api:
+  enabled: true
+  serviceAccountName: your-preconfigured-kubernetes-service-account
+  image:
+    repository: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+    tag: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+
+auth-api:
+  enabled: true
+  image:
+    repository: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+    tag: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+
+asm-plus-api:
+  enabled: true
+  image:
+    repository: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+    tag: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+
+front-auth:
+  enabled: true
+  image:
+    repository: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+    tag: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+
+front-asm-plus:
+  enabled: true
+  image:
+    repository: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+    tag: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+
+front-viewer:
+  enabled: true
+  image:
+    repository: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+    tag: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+
+api-sap:
+  enabled: false
+  image:
+    repository: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+    tag: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+
+api-sf:
+  enabled: false
+  image:
+    repository: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+    tag: REPLACED_BY_THE_APPROVED_MARKETPLACE_RELEASE
+
+migrations:
+  auth:
+    # Remains disabled until the Standard Kubernetes migration input contract
+    # and verification database profile are finalized.
+    enabled: false
+  asmPlus:
+    enabled: false
