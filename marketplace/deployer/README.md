@@ -37,3 +37,6 @@ docker run --rm --entrypoint /bin/validate_schema.py \
 Publishing and retagging release images is restricted to the Auritas release
 process. Do not publish a locally built image as an approved Marketplace
 release.
+
+The current security assessment and the treatment of vulnerabilities inherited
+from the Google deployer runtime are documented in [SECURITY.md](SECURITY.md).
