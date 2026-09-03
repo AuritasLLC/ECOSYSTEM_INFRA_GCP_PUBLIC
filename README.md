@@ -60,4 +60,7 @@ not contain ASM+ application source code, credentials, customer data,
 Terraform state, or Kubernetes Secret values. The Marketplace release remains
 a release candidate until Google completes its review.
 
-Copyright Auritas LLC. All rights reserved.
+The deployment configuration and documentation in this repository are
+licensed under the [Apache License 2.0](LICENSE). The ASM+ application software,
+container images, trademarks, and commercial license remain proprietary and
+are not licensed under this repository's Apache License.
