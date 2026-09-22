@@ -3,4 +3,4 @@ name: front-asm-plus
 description: ASM+ document navigation and workflow frontend
 type: application
 version: 0.1.0
-appVersion: "1.0.0"
+appVersion: "1.1.0"

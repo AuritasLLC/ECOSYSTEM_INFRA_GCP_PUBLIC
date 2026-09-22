@@ -57,7 +57,10 @@ ENV PATH=/opt/kubectl/default:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:
 
 ENTRYPOINT ["/bin/bash", "/bin/deploy.sh"]
 
+ARG RELEASE_VERSION=1.1.0
+ARG MARKETPLACE_SERVICE_NAME=services/REPLACE_AFTER_NEW_PRODUCT_CREATED
+
 LABEL org.opencontainers.image.title="Auritas Storage Manager (ASM+) Marketplace deployer" \
       org.opencontainers.image.vendor="Auritas LLC" \
-      org.opencontainers.image.version="1.0.1" \
-      com.googleapis.cloudmarketplace.product.service.name="services/asm-plus.endpoints.auritas-asmplus-public.cloud.goog"
+      org.opencontainers.image.version="${RELEASE_VERSION}" \
+      com.googleapis.cloudmarketplace.product.service.name="${MARKETPLACE_SERVICE_NAME}"

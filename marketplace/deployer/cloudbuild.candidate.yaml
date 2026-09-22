@@ -1,0 +1,32 @@
+steps:
+  - id: build-candidate-deployer
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --build-arg
+      - RELEASE_VERSION=${_RELEASE_VERSION}
+      - --build-arg
+      - MARKETPLACE_SERVICE_NAME=${_MARKETPLACE_SERVICE_NAME}
+      - --tag
+      - ${_TARGET_IMAGE}
+      - marketplace/deployer
+
+  - id: validate-candidate-schema
+    name: gcr.io/cloud-builders/docker
+    args:
+      - run
+      - --rm
+      - --entrypoint
+      - /bin/validate_schema.py
+      - ${_TARGET_IMAGE}
+
+images:
+  - ${_TARGET_IMAGE}
+
+substitutions:
+  _RELEASE_VERSION: 1.1.0
+  _MARKETPLACE_SERVICE_NAME: services/REPLACE_AFTER_NEW_PRODUCT_CREATED
+  _TARGET_IMAGE: us-docker.pkg.dev/auritas-asmplus-public/asmplus-marketplace/asmplus/deployer:candidate-1.1.0
+
+options:
+  logging: CLOUD_LOGGING_ONLY

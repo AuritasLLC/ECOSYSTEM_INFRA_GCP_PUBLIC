@@ -16,7 +16,7 @@ global:
     apiSf: ""
   marketplace:
     consumptionLabel: "isol_plb32_0014m00001irgbqqaq_g4sz646dffwwygzqyiappxoc7q5x4tjk"
-    serviceName: "services/asm-plus.endpoints.auritas-asmplus-public.cloud.goog"
+    serviceName: "services/REPLACE_AFTER_NEW_PRODUCT_CREATED"
     serviceLevel: default
   applicationResource:
     enabled: true
