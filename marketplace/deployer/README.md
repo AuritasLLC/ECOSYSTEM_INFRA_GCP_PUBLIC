@@ -15,9 +15,14 @@ the service-name annotation assigned to the new Producer Portal product:
 com.googleapis.cloudmarketplace.product.service.name=services/<new-listing-service-name>
 ```
 
-The candidate source deliberately uses `REPLACE_AFTER_NEW_PRODUCT_CREATED`.
-Do not publish the deployer until Producer Portal has assigned the exact new
-service name and both the schema default and build argument use that value.
+The replacement Producer Portal product uses this managed service name:
+
+```text
+services/asm-plus-gke.endpoints.auritas-asmplus-public.cloud.goog
+```
+
+The schema default, Helm chart, deployer label, and every release image must
+use this exact value.
 
 Example build command from the repository root:
 
@@ -27,7 +32,7 @@ docker buildx build \
   --provenance=false \
   --sbom=false \
   --build-arg RELEASE_VERSION=1.1.0 \
-  --build-arg MARKETPLACE_SERVICE_NAME=services/<new-listing-service-name> \
+  --build-arg MARKETPLACE_SERVICE_NAME=services/asm-plus-gke.endpoints.auritas-asmplus-public.cloud.goog \
   --output type=docker \
   --tag asmplus-marketplace-deployer:local \
   marketplace/deployer

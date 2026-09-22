@@ -2,7 +2,7 @@ x-google-marketplace:
   schemaVersion: v2
   applicationApiVersion: v1beta1
   partnerId: auritas
-  solutionId: asm-plus
+  solutionId: asm-plus-gke
   publishedVersion: "1.1.0"
   publishedVersionMetadata:
     releaseNote: Update all ASM+ application components to the September 2026 validated release.
@@ -172,10 +172,10 @@ properties:
     default: true
   global.marketplace.consumptionLabel:
     type: string
-    default: isol_plb32_0014m00001irgbqqaq_g4sz646dffwwygzqyiappxoc7q5x4tjk
+    default: isol_plb32_0014m00001irgbqqaq_qsfouxtjmtwxcqx2rimccj6jglzo53m4
   global.marketplace.serviceName:
     type: string
-    default: services/REPLACE_AFTER_NEW_PRODUCT_CREATED
+    default: services/asm-plus-gke.endpoints.auritas-asmplus-public.cloud.goog
   global.marketplace.serviceLevel:
     type: string
     default: default

@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: "{{ .Release.Name }}"
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/component: marketplace-verification
-    goog-partner-solution: "isol_plb32_0014m00001irgbqqaq_g4sz646dffwwygzqyiappxoc7q5x4tjk"
+    goog-partner-solution: "isol_plb32_0014m00001irgbqqaq_qsfouxtjmtwxcqx2rimccj6jglzo53m4"
   annotations:
     helm.sh/hook: test-success
 spec:

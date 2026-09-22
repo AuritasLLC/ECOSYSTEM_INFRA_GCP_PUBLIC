@@ -4,7 +4,7 @@ metadata:
   name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
   annotations:
-    marketplace.cloud.google.com/deploy-info: '{"partner_id":"auritas","product_id":"asm-plus","partner_name":"Auritas LLC"}'
+    marketplace.cloud.google.com/deploy-info: '{"partner_id":"auritas","product_id":"asm-plus-gke","partner_name":"Auritas LLC"}'
   labels:
     app.kubernetes.io/name: asm-plus
     app.kubernetes.io/instance: {{ .Release.Name }}
