@@ -45,6 +45,20 @@ docker run --rm --entrypoint /bin/validate_schema.py \
   asmplus-marketplace-deployer:local
 ```
 
+After pushing the image, add the required service-name annotation to the
+remote manifest and then point both release tags at the annotated digest:
+
+```bash
+crane mutate "$DEPLOYER_IMAGE:1.1.0" \
+  --annotation \
+  com.googleapis.cloudmarketplace.product.service.name=services/asm-plus-gke.endpoints.auritas-asmplus-public.cloud.goog \
+  --tag "$DEPLOYER_IMAGE:1.1.0"
+crane tag "$DEPLOYER_IMAGE:1.1.0" 1.1
+```
+
+The Dockerfile label is retained for local inspection, but the Producer
+Portal verifier reads this value from the remote image manifest annotation.
+
 Publishing and retagging release images is restricted to the Auritas release
 process. Do not publish a locally built image as an approved Marketplace
 release.
