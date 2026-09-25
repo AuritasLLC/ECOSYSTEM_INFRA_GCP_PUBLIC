@@ -38,6 +38,8 @@ steps:
           echo 'Obsolete npm migration command is still present.' >&2
           exit 1
         fi
+        grep -q 'CORS_ALLOWED_ORIGINS:' /tmp/rendered-asmplus.yaml
+        grep -q 'CORS_ORIGINS:' /tmp/rendered-asmplus.yaml
 
 options:
   logging: CLOUD_LOGGING_ONLY

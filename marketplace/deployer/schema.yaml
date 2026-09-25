@@ -5,7 +5,7 @@ x-google-marketplace:
   solutionId: asm-plus-gke
   publishedVersion: "1.1.1"
   publishedVersionMetadata:
-    releaseNote: Fix ASM+ database migration execution and GKE Applications component discovery.
+    releaseNote: Fix database migration, component discovery, and browser CORS configuration.
     releaseTypes:
       - Feature
     recommended: true

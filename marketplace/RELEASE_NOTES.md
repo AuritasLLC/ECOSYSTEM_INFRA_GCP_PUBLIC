@@ -5,6 +5,8 @@
 - Corrected the ASM+ database migration command for the hardened runtime image.
 - Corrected common resource labels so GKE Applications discovers and groups
   the Marketplace deployment components.
+- Added `CORS_ALLOWED_ORIGINS` to the ASM+ application API while retaining
+  `CORS_ORIGINS` for compatibility with the validated application image.
 - Retained the application image contents validated for version 1.1.0.
 
 ## 1.1.0 (private release)
