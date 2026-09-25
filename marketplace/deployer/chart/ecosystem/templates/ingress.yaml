@@ -5,6 +5,10 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "ingress") }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: ingress
   annotations:
     kubernetes.io/ingress.class: "gce"
     kubernetes.io/ingress.global-static-ip-name: {{ .Values.global.ingress.staticIpName | quote }}

@@ -1,0 +1,28 @@
+steps:
+  - id: annotate-deployer-manifest
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: crane
+    args:
+      - mutate
+      - ${_DEPLOYER_IMAGE}:${_RELEASE_VERSION}
+      - --annotation
+      - com.googleapis.cloudmarketplace.product.service.name=${_MARKETPLACE_SERVICE_NAME}
+      - --tag
+      - ${_DEPLOYER_IMAGE}:${_RELEASE_VERSION}
+
+  - id: update-minor-release-tag
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: crane
+    args:
+      - tag
+      - ${_DEPLOYER_IMAGE}:${_RELEASE_VERSION}
+      - ${_MINOR_VERSION}
+
+substitutions:
+  _RELEASE_VERSION: 1.1.1
+  _MINOR_VERSION: "1.1"
+  _MARKETPLACE_SERVICE_NAME: services/asm-plus-gke.endpoints.auritas-asmplus-public.cloud.goog
+  _DEPLOYER_IMAGE: us-docker.pkg.dev/auritas-asmplus-public/asmplus-marketplace/asmplus/deployer
+
+options:
+  logging: CLOUD_LOGGING_ONLY

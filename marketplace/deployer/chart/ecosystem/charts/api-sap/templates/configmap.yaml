@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "api-sap-config") }}
   labels:
-    app.kubernetes.io/name: api-sap
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: sap-api
 data:

@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "api-auth") }}
   labels:
-    app.kubernetes.io/name: api-auth
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: authentication-api
 spec:

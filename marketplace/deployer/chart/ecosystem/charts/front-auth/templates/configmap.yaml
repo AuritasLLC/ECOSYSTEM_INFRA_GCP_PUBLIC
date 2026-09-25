@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "front-auth-config") }}
   labels:
-    app.kubernetes.io/name: front-auth
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: authentication-frontend
 data:

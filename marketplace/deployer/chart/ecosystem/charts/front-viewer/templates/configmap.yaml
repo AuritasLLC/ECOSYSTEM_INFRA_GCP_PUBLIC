@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "front-viewer-config") }}
   labels:
-    app.kubernetes.io/name: front-viewer
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: document-viewer
 data:

@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "auth-api-config") }}
   labels:
-    app.kubernetes.io/name: api-auth
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: authentication-api
 data:

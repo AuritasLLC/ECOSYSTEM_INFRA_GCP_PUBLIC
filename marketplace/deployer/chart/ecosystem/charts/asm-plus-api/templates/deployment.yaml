@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "api-asm-plus") }}
   labels:
-    app.kubernetes.io/name: api-asm-plus
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: document-management-api
 spec:

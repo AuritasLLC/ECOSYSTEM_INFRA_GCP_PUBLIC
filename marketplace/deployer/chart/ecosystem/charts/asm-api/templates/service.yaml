@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "asm-api") }}
   labels:
-    app.kubernetes.io/name: asm-api
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: storage-api
 spec:

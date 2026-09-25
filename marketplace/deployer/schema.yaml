@@ -3,9 +3,9 @@ x-google-marketplace:
   applicationApiVersion: v1beta1
   partnerId: auritas
   solutionId: asm-plus-gke
-  publishedVersion: "1.1.0"
+  publishedVersion: "1.1.1"
   publishedVersionMetadata:
-    releaseNote: Update all ASM+ application components to the September 2026 validated release.
+    releaseNote: Fix ASM+ database migration execution and GKE Applications component discovery.
     releaseTypes:
       - Feature
     recommended: true

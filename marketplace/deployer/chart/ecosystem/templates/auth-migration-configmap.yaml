@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: {{ include "ecosystem.resourceName" (list . (printf "auth-migration-sql-%s" (.Release.Revision | toString))) }}
   labels:
-    app.kubernetes.io/name: auth-migration
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: database-migration
 data:

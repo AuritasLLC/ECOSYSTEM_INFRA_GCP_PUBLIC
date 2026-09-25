@@ -5,6 +5,10 @@ apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "front-auth-backend") }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: ingress-backend
 spec:
   healthCheck:
     type: HTTP
@@ -19,6 +23,10 @@ apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "api-auth-backend") }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: ingress-backend
 spec:
   healthCheck:
     type: HTTP
@@ -33,6 +41,10 @@ apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "front-asm-plus-backend") }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: ingress-backend
 spec:
   healthCheck:
     type: HTTP
@@ -47,6 +59,10 @@ apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "api-asm-plus-backend") }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: ingress-backend
 spec:
   healthCheck:
     type: HTTP
@@ -61,6 +77,10 @@ apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "front-viewer-backend") }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: ingress-backend
 spec:
   healthCheck:
     type: HTTP
@@ -76,6 +96,10 @@ apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "api-sap-backend") }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: ingress-backend
 spec:
   healthCheck:
     type: HTTP
@@ -92,6 +116,10 @@ apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "api-sf-backend") }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: ingress-backend
 spec:
   healthCheck:
     type: HTTP

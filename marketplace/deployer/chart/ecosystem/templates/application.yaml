@@ -6,7 +6,7 @@ metadata:
   annotations:
     marketplace.cloud.google.com/deploy-info: '{"partner_id":"auritas","product_id":"asm-plus-gke","partner_name":"Auritas LLC"}'
   labels:
-    app.kubernetes.io/name: asm-plus
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -54,3 +54,5 @@ spec:
       kind: ManagedCertificate
     - group: networking.gke.io
       kind: FrontendConfig
+    - group: cloud.google.com
+      kind: BackendConfig

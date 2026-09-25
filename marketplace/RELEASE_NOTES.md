@@ -1,6 +1,13 @@
 # ASM+ Marketplace release notes
 
-## 1.1.0 (candidate)
+## 1.1.1 (candidate)
+
+- Corrected the ASM+ database migration command for the hardened runtime image.
+- Corrected common resource labels so GKE Applications discovers and groups
+  the Marketplace deployment components.
+- Retained the application image contents validated for version 1.1.0.
+
+## 1.1.0 (private release)
 
 - Updated all eight ASM+ application images to the September 2026 builds
   validated together in the GCP deployment.
@@ -9,8 +16,8 @@
 - Staged the exact tested image digests in the producer Artifact Registry.
 - Artifact Analysis completed successfully with zero Critical, High, Medium,
   or Low findings for the eight application images.
-- Final Marketplace tags and the deployer image remain blocked until Producer
-  Portal assigns the replacement product's exact service name.
+- Published privately for the replacement `asm-plus-gke` listing and used for
+  the first end-to-end customer-style deployment test.
 
 ## 1.0.1
 

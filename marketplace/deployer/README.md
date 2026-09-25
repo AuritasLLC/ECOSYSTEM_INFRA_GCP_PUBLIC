@@ -31,7 +31,7 @@ docker buildx build \
   --platform linux/amd64 \
   --provenance=false \
   --sbom=false \
-  --build-arg RELEASE_VERSION=1.1.0 \
+  --build-arg RELEASE_VERSION=1.1.1 \
   --build-arg MARKETPLACE_SERVICE_NAME=services/asm-plus-gke.endpoints.auritas-asmplus-public.cloud.goog \
   --output type=docker \
   --tag asmplus-marketplace-deployer:local \
@@ -49,11 +49,11 @@ After pushing the image, add the required service-name annotation to the
 remote manifest and then point both release tags at the annotated digest:
 
 ```bash
-crane mutate "$DEPLOYER_IMAGE:1.1.0" \
+crane mutate "$DEPLOYER_IMAGE:1.1.1" \
   --annotation \
   com.googleapis.cloudmarketplace.product.service.name=services/asm-plus-gke.endpoints.auritas-asmplus-public.cloud.goog \
-  --tag "$DEPLOYER_IMAGE:1.1.0"
-crane tag "$DEPLOYER_IMAGE:1.1.0" 1.1
+  --tag "$DEPLOYER_IMAGE:1.1.1"
+crane tag "$DEPLOYER_IMAGE:1.1.1" 1.1
 ```
 
 The Dockerfile label is retained for local inspection, but the Producer

@@ -5,7 +5,7 @@ kind: Job
 metadata:
   name: {{ include "ecosystem.resourceName" (list . (printf "asmplus-migration-%s" (.Release.Revision | toString))) }}
   labels:
-    app.kubernetes.io/name: asmplus-migration
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: database-migration
 spec:
@@ -135,7 +135,9 @@ spec:
               NODE
 
               echo "Running ASM+ migration"
-              npm run db:migrate
+              # The hardened runtime image intentionally omits the npm CLI.
+              # Execute the compiled migration entry point directly with Node.
+              node dist/scripts/run-schema.js
               echo "ASM+ migration completed"
 
           env:

@@ -4,7 +4,7 @@ kind: FrontendConfig
 metadata:
   name: {{ include "ecosystem.resourceName" (list . "frontend-config") }}
   labels:
-    app.kubernetes.io/name: asm-plus
+    app.kubernetes.io/name: {{ .Release.Name | quote }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   redirectToHttps:

@@ -1,0 +1,43 @@
+steps:
+  - id: verify-release-architecture
+    name: us-docker.pkg.dev/auritas-asmplus-public/asmplus-marketplace/asmplus/deployer:1.1.1
+    entrypoint: /bin/bash
+    args:
+      - -ceu
+      - |
+        test "$(uname -m)" = "x86_64"
+
+  - id: validate-release-schema
+    name: us-docker.pkg.dev/auritas-asmplus-public/asmplus-marketplace/asmplus/deployer:1.1.1
+    entrypoint: /bin/validate_schema.py
+
+  - id: lint-helm-chart
+    name: us-docker.pkg.dev/auritas-asmplus-public/asmplus-marketplace/asmplus/deployer:1.1.1
+    entrypoint: /usr/local/bin/helm
+    args:
+      - lint
+      - /workspace/marketplace/deployer/chart/ecosystem
+      - --values
+      - /workspace/marketplace/examples/values.customer.example.yaml
+
+  - id: render-helm-chart
+    name: us-docker.pkg.dev/auritas-asmplus-public/asmplus-marketplace/asmplus/deployer:1.1.1
+    entrypoint: /bin/bash
+    args:
+      - -ceu
+      - |
+        /usr/local/bin/helm template asm-plus-review \
+          /workspace/marketplace/deployer/chart/ecosystem \
+          --namespace asm-plus-review \
+          --values /workspace/marketplace/examples/values.customer.example.yaml \
+          --set migrations.auth.enabled=true \
+          --set migrations.asmPlus.enabled=true \
+          > /tmp/rendered-asmplus.yaml
+        grep -q 'node dist/scripts/run-schema.js' /tmp/rendered-asmplus.yaml
+        if grep -q 'npm run db:migrate' /tmp/rendered-asmplus.yaml; then
+          echo 'Obsolete npm migration command is still present.' >&2
+          exit 1
+        fi
+
+options:
+  logging: CLOUD_LOGGING_ONLY
